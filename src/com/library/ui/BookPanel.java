@@ -231,4 +231,7 @@ public class BookPanel extends JPanel {
             });
         }
     }
+    public void refreshTable() {
+        loadBooks();
+    }
 }

@@ -1,48 +1,110 @@
 package com.library.ui;
-import com.library.model.Book;
+
+import com.library.model.Transaction;
 import com.library.service.TransactionService;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.util.List;
 
 public class ReturnBookPanel extends JPanel {
 
+    private JTable table;
+    private DefaultTableModel model;
     private JTextField transactionIdField;
 
-    private TransactionService transactionService = new TransactionService();
+    private TransactionService transactionService;
+    private BookPanel bookPanel;
 
-    public ReturnBookPanel() {
+    public ReturnBookPanel(BookPanel bookPanel) {
 
-        setLayout(new GridLayout(3,2,10,10));
+        this.bookPanel = bookPanel;
+        this.transactionService = new TransactionService();
 
-        transactionIdField = new JTextField();
+        setLayout(new BorderLayout());
 
-        add(new JLabel("Transaction ID"));
-        add(transactionIdField);
+        // TOP PANEL
+        JPanel topPanel = new JPanel(new FlowLayout());
 
+        transactionIdField = new JTextField(10);
         JButton returnBtn = new JButton("Return Book");
 
-        add(new JLabel());
-        add(returnBtn);
+        topPanel.add(new JLabel("Transaction ID:"));
+        topPanel.add(transactionIdField);
+        topPanel.add(returnBtn);
+
+        add(topPanel, BorderLayout.NORTH);
+
+        // TABLE
+        model = new DefaultTableModel();
+        model.setColumnIdentifiers(new String[]{
+                "ID", "Student ID", "Book ID", "Issue Date"
+        });
+
+        table = new JTable(model);
+        add(new JScrollPane(table), BorderLayout.CENTER);
+
+        // 🔥 LOAD DATA
+        refreshTable();
+
+        // CLICK ROW → AUTO FILL
+        table.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                int row = table.getSelectedRow();
+                if (row != -1) {
+                    int id = (int) model.getValueAt(row, 0);
+                    transactionIdField.setText(String.valueOf(id));
+                }
+            }
+        });
 
         returnBtn.addActionListener(e -> returnBook());
     }
 
-    private void returnBook(){
+    // 🔥 NEW METHOD
+    public void refreshTable() {
+
+        model.setRowCount(0);
+
+        List<Transaction> list = transactionService.getIssuedTransactions();
+
+        for (Transaction t : list) {
+            model.addRow(new Object[]{
+                    t.getId(),
+                    t.getStudentId(),
+                    t.getBookId(),
+                    t.getIssueDate()
+            });
+        }
+
+        model.fireTableDataChanged();
+    }
+
+    private void returnBook() {
 
         try {
-            Book book = new Book();
-            book.setId(0); // temporary fix
 
-            int transactionId = Integer.parseInt(transactionIdField.getText());
+            int transactionId = Integer.parseInt(transactionIdField.getText().trim());
 
-            transactionService.returnBook(transactionId, book);
+            String result = transactionService.returnBook(transactionId);
 
-            JOptionPane.showMessageDialog(this,"Book Returned Successfully");
+            if ("SUCCESS".equals(result)) {
 
-        } catch (Exception e){
+                JOptionPane.showMessageDialog(this, "Book Returned Successfully");
 
-            JOptionPane.showMessageDialog(this,"Invalid transaction id");
+                // 🔥 FORCE REFRESH
+                refreshTable();
+                bookPanel.refreshTable();
+
+                transactionIdField.setText("");
+
+            } else {
+                JOptionPane.showMessageDialog(this, result);
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Invalid transaction ID");
         }
     }
 }

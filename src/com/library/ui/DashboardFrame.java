@@ -7,7 +7,7 @@ import javax.swing.*;
  * Main application window
  */
 public class DashboardFrame extends JFrame {
-
+    private BookPanel bookPanel;
     public DashboardFrame(){
 
         setTitle("Library Management System - Dashboard");
@@ -17,11 +17,12 @@ public class DashboardFrame extends JFrame {
 
         JTabbedPane tabbedPane = new JTabbedPane();
 
-        tabbedPane.addTab("Books", new BookPanel());
-        tabbedPane.addTab("Students", new StudentPanel());
-        tabbedPane.addTab("Issue Book", new IssueBookPanel());
-        tabbedPane.addTab("Return Book", new ReturnBookPanel());
+        bookPanel = new BookPanel();
 
+        tabbedPane.addTab("Books", bookPanel);
+        tabbedPane.addTab("Students", new StudentPanel());
+        tabbedPane.addTab("Issue Book", new IssueBookPanel(bookPanel));
+        tabbedPane.addTab("Return Book", new ReturnBookPanel(bookPanel));
         add(tabbedPane);
     }
 }

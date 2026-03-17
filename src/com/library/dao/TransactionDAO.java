@@ -3,84 +3,107 @@ package com.library.dao;
 import com.library.config.DBConnection;
 import com.library.model.Transaction;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * TransactionDAO
- * Handles book issue and return operations
- */
 public class TransactionDAO {
 
-    /**
-     * Issue book
-     */
-    public boolean issueBook(Transaction transaction) {
+    // ISSUE BOOK
+    public boolean issueBook(Transaction t) {
 
-        String sql = "INSERT INTO transactions(student_id, book_id, issue_date, status) VALUES(?,?,?,?)";
+        String sql = "INSERT INTO transactions (student_id, book_id, issue_date, status) VALUES (?, ?, ?, ?)";
 
         try {
-
             Connection conn = DBConnection.getInstance().getConnection();
             PreparedStatement stmt = conn.prepareStatement(sql);
 
-            stmt.setInt(1, transaction.getStudentId());
-            stmt.setInt(2, transaction.getBookId());
-            stmt.setDate(3, transaction.getIssueDate());
+            stmt.setInt(1, t.getStudentId());
+            stmt.setInt(2, t.getBookId());
+            stmt.setDate(3, t.getIssueDate());
             stmt.setString(4, "ISSUED");
 
-            return stmt.executeUpdate() > 0;
+            int rows = stmt.executeUpdate();
+
+            return rows > 0;
 
         } catch (Exception e) {
             e.printStackTrace();
+            return false;
         }
-
-        return false;
     }
 
-    /**
-     * Return book
-     */
-    public boolean returnBook(int transactionId, Date returnDate) {
+    // RETURN BOOK
+    public boolean returnBook(int transactionId, java.sql.Date returnDate) {
 
-        String sql = "UPDATE transactions SET return_date=?, status='RETURNED' WHERE id=?";
+        String sql = "UPDATE transactions SET return_date = ?, status = 'RETURNED' WHERE id = ?";
 
         try {
-
             Connection conn = DBConnection.getInstance().getConnection();
             PreparedStatement stmt = conn.prepareStatement(sql);
 
             stmt.setDate(1, returnDate);
             stmt.setInt(2, transactionId);
 
-            return stmt.executeUpdate() > 0;
+            int rows = stmt.executeUpdate();
+
+            return rows > 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // GET SINGLE TRANSACTION
+    public Transaction getTransactionById(int id) {
+
+        String sql = "SELECT * FROM transactions WHERE id = ?";
+
+        try {
+            Connection conn = DBConnection.getInstance().getConnection();
+            PreparedStatement stmt = conn.prepareStatement(sql);
+
+            stmt.setInt(1, id);
+
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                Transaction t = new Transaction();
+
+                t.setId(rs.getInt("id"));
+                t.setStudentId(rs.getInt("student_id"));
+                t.setBookId(rs.getInt("book_id"));
+                t.setIssueDate(rs.getDate("issue_date"));
+                t.setReturnDate(rs.getDate("return_date"));
+                t.setStatus(rs.getString("status"));
+
+                return t;
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        return false;
+        return null;
     }
 
-    /**
-     * Get all transactions
-     */
-    public List<Transaction> getAllTransactions() {
+    // GET ONLY ISSUED TRANSACTIONS (FOR RETURN PANEL)
+    public List<Transaction> getIssuedTransactions() {
 
         List<Transaction> list = new ArrayList<>();
 
-        String sql = "SELECT * FROM transactions";
+        String sql = "SELECT * FROM transactions WHERE status = 'ISSUED'";
 
         try {
-
             Connection conn = DBConnection.getInstance().getConnection();
             PreparedStatement stmt = conn.prepareStatement(sql);
 
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
-
                 Transaction t = new Transaction();
 
                 t.setId(rs.getInt("id"));
@@ -100,24 +123,20 @@ public class TransactionDAO {
         return list;
     }
 
-    /**
-     * Get issued books
-     */
-    public List<Transaction> getIssuedBooks() {
+    // GET ALL TRANSACTIONS (OPTIONAL - FOR FUTURE HISTORY VIEW)
+    public List<Transaction> getAllTransactions() {
 
         List<Transaction> list = new ArrayList<>();
 
-        String sql = "SELECT * FROM transactions WHERE status='ISSUED'";
+        String sql = "SELECT * FROM transactions";
 
         try {
-
             Connection conn = DBConnection.getInstance().getConnection();
             PreparedStatement stmt = conn.prepareStatement(sql);
 
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
-
                 Transaction t = new Transaction();
 
                 t.setId(rs.getInt("id"));

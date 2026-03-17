@@ -1,5 +1,5 @@
 package com.library.ui;
-import com.library.model.Book;
+
 import com.library.model.Transaction;
 import com.library.service.TransactionService;
 
@@ -12,11 +12,15 @@ public class IssueBookPanel extends JPanel {
     private JTextField studentIdField;
     private JTextField bookIdField;
 
-    private TransactionService transactionService = new TransactionService();
+    private TransactionService transactionService;
+    private BookPanel bookPanel;
 
-    public IssueBookPanel() {
+    public IssueBookPanel(BookPanel bookPanel) {
 
-        setLayout(new GridLayout(4,2,10,10));
+        this.bookPanel = bookPanel;
+        this.transactionService = new TransactionService();
+
+        setLayout(new GridLayout(4, 2, 10, 10));
 
         studentIdField = new JTextField();
         bookIdField = new JTextField();
@@ -35,29 +39,37 @@ public class IssueBookPanel extends JPanel {
         issueBtn.addActionListener(e -> issueBook());
     }
 
-    private void issueBook(){
+    private void issueBook() {
 
         try {
 
-            int studentId = Integer.parseInt(studentIdField.getText());
-            int bookId = Integer.parseInt(bookIdField.getText());
+            int studentId = Integer.parseInt(studentIdField.getText().trim());
+            int bookId = Integer.parseInt(bookIdField.getText().trim());
 
             Transaction t = new Transaction();
-
             t.setStudentId(studentId);
             t.setBookId(bookId);
             t.setIssueDate(java.sql.Date.valueOf(LocalDate.now()));
 
-            Book book = new Book();
-            book.setId(0); // temporary
+            String result = transactionService.issueBook(t);
 
-            transactionService.issueBook(t, book);
+            if ("SUCCESS".equals(result)) {
+                JOptionPane.showMessageDialog(this, "Book Issued Successfully");
 
-            JOptionPane.showMessageDialog(this,"Book Issued Successfully");
+                // 🔥 REAL-TIME UPDATE
+                bookPanel.refreshTable();
 
-        } catch (Exception e){
+            } else {
+                JOptionPane.showMessageDialog(this, result);
+            }
 
-            JOptionPane.showMessageDialog(this,"Invalid input");
+        } catch (NumberFormatException e) {
+
+            JOptionPane.showMessageDialog(this, "Enter valid numeric IDs");
+
+        } catch (Exception e) {
+
+            JOptionPane.showMessageDialog(this, "Error occurred");
         }
     }
 }

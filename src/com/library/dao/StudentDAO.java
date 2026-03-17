@@ -134,26 +134,22 @@ public class StudentDAO {
         String sql = "SELECT * FROM students WHERE id=?";
 
         try {
-
             Connection conn = DBConnection.getInstance().getConnection();
             PreparedStatement stmt = conn.prepareStatement(sql);
-
             stmt.setInt(1, id);
 
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
+                Student s = new Student();
 
-                Student student = new Student();
+                s.setId(rs.getInt("id"));
+                s.setName(rs.getString("name"));
+                s.setEmail(rs.getString("email"));
+                s.setPhone(rs.getString("phone"));
+                s.setDepartment(rs.getString("department"));
 
-                student.setId(rs.getInt("id"));
-                student.setName(rs.getString("name"));
-                student.setEmail(rs.getString("email"));
-                student.setPhone(rs.getString("phone"));
-                student.setDepartment(rs.getString("department"));
-                student.setCreatedAt(rs.getTimestamp("created_at"));
-
-                return student;
+                return s;
             }
 
         } catch (Exception e) {
@@ -161,5 +157,5 @@ public class StudentDAO {
         }
 
         return null;
-    }
+    }   
 }
