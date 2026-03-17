@@ -17,7 +17,7 @@ public class DBConnection {
 
     // Database credentials
     private static final String USER = "root";
-    private static final String PASSWORD = "password";
+    private static final String PASSWORD = "root123";
 
     // Singleton instance
     private static DBConnection instance;

@@ -1,5 +1,5 @@
 package com.library.ui;
-
+import com.library.model.Book;
 import com.library.model.Transaction;
 import com.library.service.TransactionService;
 
@@ -46,9 +46,12 @@ public class IssueBookPanel extends JPanel {
 
             t.setStudentId(studentId);
             t.setBookId(bookId);
-            t.setIssueDate(LocalDate.now());
+            t.setIssueDate(java.sql.Date.valueOf(LocalDate.now()));
 
-            transactionService.issueBook(t);
+            Book book = new Book();
+            book.setId(0); // temporary
+
+            transactionService.issueBook(t, book);
 
             JOptionPane.showMessageDialog(this,"Book Issued Successfully");
 

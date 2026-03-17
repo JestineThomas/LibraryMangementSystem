@@ -1,5 +1,5 @@
 package com.library.ui;
-
+import com.library.model.Book;
 import com.library.service.TransactionService;
 
 import javax.swing.*;
@@ -31,10 +31,12 @@ public class ReturnBookPanel extends JPanel {
     private void returnBook(){
 
         try {
+            Book book = new Book();
+            book.setId(0); // temporary fix
 
             int transactionId = Integer.parseInt(transactionIdField.getText());
 
-            transactionService.returnBook(transactionId);
+            transactionService.returnBook(transactionId, book);
 
             JOptionPane.showMessageDialog(this,"Book Returned Successfully");
 
