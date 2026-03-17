@@ -1,0 +1,51 @@
+# 🔹 Compiled class files
+*.class
+
+# 🔹 Log files
+*.log
+
+# 🔹 BlueJ files
+*.ctxt
+
+# 🔹 Package files
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# 🔹 JVM crash logs
+hs_err_pid*
+
+# 🔹 Build folders
+/out/
+/build/
+/bin/
+/target/
+
+# 🔹 IDE folders
+/.idea/
+/.vscode/
+/.settings/
+/.metadata/
+
+# 🔹 OS files
+.DS_Store
+Thumbs.db
+
+# 🔹 Temporary files
+*.tmp
+*.swp
+
+# 🔹 Database config (optional - security)
+/.env
+/application.properties
+/config.properties
+
+# 🔹 MySQL dump files
+*.sql
+
+# 🔹 Library files (optional)
+lib/*.jar
