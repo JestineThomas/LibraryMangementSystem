@@ -113,24 +113,42 @@ public class StudentPanel extends JPanel {
     }
 
     /**
-     * Register student
+     * Register student (FIXED)
      */
     private void addStudent(){
 
-        Student s = new Student();
+        try {
+            String name = nameField.getText().trim();
+            String email = emailField.getText().trim();
+            String phone = phoneField.getText().trim();
+            String dept = deptField.getText().trim();
 
-        s.setName(nameField.getText());
-        s.setEmail(emailField.getText());
-        s.setPhone(phoneField.getText());
-        s.setDepartment(deptField.getText());
+            // ✅ VALIDATION
+            if(name.isEmpty()){
+                JOptionPane.showMessageDialog(this,"Name is required");
+                return;
+            }
 
-        boolean success = studentService.registerStudent(s);
+            Student s = new Student();
+            s.setName(name);
+            s.setEmail(email);
+            s.setPhone(phone);
+            s.setDepartment(dept);
 
-        if(success){
-            JOptionPane.showMessageDialog(this,"Student Registered");
-            loadStudents();
-        } else {
-            JOptionPane.showMessageDialog(this,"Error");
+            boolean success = studentService.registerStudent(s);
+
+            if(success){
+                JOptionPane.showMessageDialog(this,"Student Registered Successfully");
+
+                clearFields();   // 🔥 UX improvement
+                loadStudents();
+            } else {
+                JOptionPane.showMessageDialog(this,"Error Adding Student");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this,"Unexpected Error");
         }
     }
 
@@ -139,28 +157,43 @@ public class StudentPanel extends JPanel {
      */
     private void updateStudent(){
 
-        int row = table.getSelectedRow();
+        try {
+            int row = table.getSelectedRow();
 
-        if(row == -1){
-            JOptionPane.showMessageDialog(this,"Select student");
-            return;
-        }
+            if(row == -1){
+                JOptionPane.showMessageDialog(this,"Select student");
+                return;
+            }
 
-        int id = (int) tableModel.getValueAt(row,0);
+            String name = nameField.getText().trim();
 
-        Student s = new Student();
+            if(name.isEmpty()){
+                JOptionPane.showMessageDialog(this,"Name is required");
+                return;
+            }
 
-        s.setId(id);
-        s.setName(nameField.getText());
-        s.setEmail(emailField.getText());
-        s.setPhone(phoneField.getText());
-        s.setDepartment(deptField.getText());
+            int id = (int) tableModel.getValueAt(row,0);
 
-        boolean success = studentService.updateStudent(s);
+            Student s = new Student();
 
-        if(success){
-            JOptionPane.showMessageDialog(this,"Student Updated");
-            loadStudents();
+            s.setId(id);
+            s.setName(name);
+            s.setEmail(emailField.getText().trim());
+            s.setPhone(phoneField.getText().trim());
+            s.setDepartment(deptField.getText().trim());
+
+            boolean success = studentService.updateStudent(s);
+
+            if(success){
+                JOptionPane.showMessageDialog(this,"Student Updated");
+                loadStudents();
+            } else {
+                JOptionPane.showMessageDialog(this,"Update Failed");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this,"Error Updating Student");
         }
     }
 
@@ -169,20 +202,50 @@ public class StudentPanel extends JPanel {
      */
     private void deleteStudent(){
 
-        int row = table.getSelectedRow();
+        try {
+            int row = table.getSelectedRow();
 
-        if(row == -1){
-            JOptionPane.showMessageDialog(this,"Select student");
-            return;
+            if(row == -1){
+                JOptionPane.showMessageDialog(this,"Select student");
+                return;
+            }
+
+            int id = (int) tableModel.getValueAt(row,0);
+
+            int confirm = JOptionPane.showConfirmDialog(
+                    this,
+                    "Are you sure you want to delete?",
+                    "Confirm",
+                    JOptionPane.YES_NO_OPTION
+            );
+
+            if(confirm != JOptionPane.YES_OPTION){
+                return;
+            }
+
+            boolean success = studentService.deleteStudent(id);
+
+            if(success){
+                JOptionPane.showMessageDialog(this,"Student Deleted");
+                loadStudents();
+                clearFields();
+            } else {
+                JOptionPane.showMessageDialog(this,"Delete Failed");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this,"Error Deleting Student");
         }
+    }
 
-        int id = (int) tableModel.getValueAt(row,0);
-
-        boolean success = studentService.deleteStudent(id);
-
-        if(success){
-            JOptionPane.showMessageDialog(this,"Student Deleted");
-            loadStudents();
-        }
+    /**
+     * Clear input fields (NEW)
+     */
+    private void clearFields(){
+        nameField.setText("");
+        emailField.setText("");
+        phoneField.setText("");
+        deptField.setText("");
     }
 }
